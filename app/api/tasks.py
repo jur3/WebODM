@@ -23,7 +23,7 @@ class TaskIDsSerializer(serializers.BaseSerializer):
 
 class TaskSerializer(serializers.ModelSerializer):
     project = serializers.PrimaryKeyRelatedField(queryset=models.Project.objects.all())
-    processing_node = serializers.PrimaryKeyRelatedField(queryset=ProcessingNode.objects.all()) 
+    processing_node = serializers.PrimaryKeyRelatedField(queryset=ProcessingNode.objects.all())
     images_count = serializers.SerializerMethodField()
     can_rerun_from = serializers.SerializerMethodField()
 
@@ -61,7 +61,7 @@ class TaskViewSet(viewsets.ViewSet):
     Once a processing node completes processing, results are stored in the task.
     """
     queryset = models.Task.objects.all().defer('orthophoto_extent', 'dsm_extent', 'dtm_extent', 'console_output', )
-    
+
     # We don't use object level permissions on tasks, relying on
     # project's object permissions instead (but standard model permissions still apply)
     permission_classes = (permissions.DjangoModelPermissions, )
@@ -133,10 +133,10 @@ class TaskViewSet(viewsets.ViewSet):
 
     def create(self, request, project_pk=None):
         project = get_and_check_project(request, project_pk, ('change_project', ))
-        
+
         # MultiValueDict in, flat array of files out
         files = [file for filesList in map(
-                        lambda key: request.FILES.getlist(key), 
+                        lambda key: request.FILES.getlist(key),
                         [keys for keys in request.FILES])
                     for file in filesList]
 
@@ -256,10 +256,11 @@ class TaskDownloads(TaskNestedView):
             Downloads a task asset (if available)
             """
             task = self.get_and_check_task(request, pk)
-
-            # Check and download
             try:
+                get_and_check_project(request, project_pk, ('download_project', ))
                 asset_path = task.get_asset_download_path(asset)
+            except exceptions.NotFound:
+                raise exceptions.PermissionDenied()
             except FileNotFoundError:
                 raise exceptions.NotFound("Asset does not exist")
 

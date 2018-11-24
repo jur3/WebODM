@@ -8,7 +8,8 @@ class TaskList extends React.Component {
   static propTypes = {
       history: PropTypes.object.isRequired,
       source: PropTypes.string.isRequired, // URL where to load task list
-      onDelete: PropTypes.func
+      onDelete: PropTypes.func,
+      projectPermissions: PropTypes.arrayOf(PropTypes.string),
   }
 
   constructor(props){
@@ -26,7 +27,7 @@ class TaskList extends React.Component {
   }
 
   componentDidMount(){
-    this.loadTaskList(); 
+    this.loadTaskList();
   }
 
   refresh(){
@@ -39,14 +40,14 @@ class TaskList extends React.Component {
   }
 
   loadTaskList(){
-    this.taskListRequest = 
+    this.taskListRequest =
       $.getJSON(this.props.source, json => {
           this.setState({
               tasks: json
           });
         })
         .fail((jqXHR, textStatus, errorThrown) => {
-          this.setState({ 
+          this.setState({
               error: `Could not load task list: ${textStatus}`,
           });
         })
@@ -83,12 +84,13 @@ class TaskList extends React.Component {
         {message}
 
         {this.state.tasks.map(task => (
-          <TaskListItem 
-            data={task} 
-            key={task.id} 
-            refreshInterval={3000} 
-            onDelete={this.deleteTask} 
-            history={this.props.history} />
+          <TaskListItem
+            data={task}
+            key={task.id}
+            refreshInterval={3000}
+            onDelete={this.deleteTask}
+            history={this.props.history}
+            projectPermissions={this.props.projectPermissions} />
         ))}
       </div>
     );

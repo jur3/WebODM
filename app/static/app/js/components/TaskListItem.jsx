@@ -15,7 +15,8 @@ class TaskListItem extends React.Component {
       history: PropTypes.object.isRequired,
       data: PropTypes.object.isRequired, // task json
       refreshInterval: PropTypes.number, // how often to refresh info
-      onDelete: PropTypes.func
+      onDelete: PropTypes.func,
+      projectPermissions: PropTypes.arrayOf(PropTypes.string),
   }
 
   constructor(props){
@@ -47,6 +48,11 @@ class TaskListItem extends React.Component {
     this.downloadTaskOutput = this.downloadTaskOutput.bind(this);
     this.copyTaskOutput = this.copyTaskOutput.bind(this);
     this.handleEditTaskSave = this.handleEditTaskSave.bind(this);
+    this.hasProjectPermission = this.hasProjectPermission.bind(this);
+  }
+
+  hasProjectPermission(perm){
+    return this.props.projectPermissions.indexOf(perm) !== -1;
   }
 
   shouldRefresh(){
@@ -238,7 +244,7 @@ class TaskListItem extends React.Component {
           line.indexOf("loky.process_executor.TerminatedWorkerError:") !== -1 ||
           line.indexOf("Failed to allocate memory") !== -1){
         this.setState({memoryError: true});
-      }else if (line.indexOf("SVD did not converge") !== -1 || 
+      }else if (line.indexOf("SVD did not converge") !== -1 ||
                 line.indexOf("0 partial reconstructions in total") !== -1){
         this.setState({friendlyTaskError: `It looks like the images might have one of the following problems:
         <ul>
@@ -445,9 +451,9 @@ class TaskListItem extends React.Component {
       const disabled = this.state.actionButtonsDisabled || !!task.pending_action;
 
       actionButtons = (<div className="action-buttons">
-            {task.status === statusCodes.COMPLETED ?
+            {task.status === statusCodes.COMPLETED && this.hasProjectPermission('download') ?
               <AssetDownloadButtons task={this.state.task} disabled={disabled} />
-            : ""}
+            : "" }
             {actionButtons.map(button => {
               const subItems = button.options.subItems || [];
               const className = button.options.className || "";

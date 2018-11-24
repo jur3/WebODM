@@ -54,6 +54,7 @@ class Project(models.Model):
     class Meta:
         permissions = (
             ('view_project', 'Can view project'),
+            ('download_project', 'Can download project')
         )
 
 

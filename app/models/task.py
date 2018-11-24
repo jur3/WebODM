@@ -168,7 +168,6 @@ class Task(models.Model):
     public = models.BooleanField(default=False, help_text="A flag indicating whether this task is available to the public")
     resize_to = models.IntegerField(default=-1, help_text="When set to a value different than -1, indicates that the images for this task have been / will be resized to the size specified here before processing.")
 
-
     def __init__(self, *args, **kwargs):
         super(Task, self).__init__(*args, **kwargs)
 
@@ -602,7 +601,7 @@ class Task(models.Model):
         self.status = status_codes.FAILED
         self.pending_action = None
         self.save()
-        
+
     def find_all_files_matching(self, regex):
         directory = full_task_directory_path(self.id, self.project.id)
         return [os.path.join(directory, f) for f in os.listdir(directory) if
@@ -660,4 +659,5 @@ class Task(models.Model):
     class Meta:
         permissions = (
             ('view_task', 'Can view task'),
+            ('download_task', 'Can download task'),
         )
